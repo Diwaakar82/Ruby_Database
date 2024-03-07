@@ -8,7 +8,6 @@ class DB
 
     def initialize(database)
         @database = database
-        @table_name = 'A'
         @client = Mysql2::Client.new(host: "localhost", username: @@username, password: @@password, database: @database)
     end
 
@@ -32,7 +31,7 @@ class DB
             ch = gets
 
             # puts "Input: #{ch}"
-            break if ch[0] != 'y' || ch[0] != "y"
+            break if ch[0] != 'y'
         end
 
         request [-1] = ')'
@@ -46,9 +45,9 @@ class DB
         puts "1. Display all rows\n2. Show certain columns\n"
         choice = gets
 
-        case choice
+        case choice [0].to_i
             when 1
-                request += "* FROM #{@table_name};"
+                request += "* "
             when 2
                 ch = 'y'
                 loop do
@@ -70,7 +69,11 @@ class DB
         request += "FROM #{@table_name}"
         request += ';'
     
-        @client.query (request)
+        result = @client.query (request)
+
+        result.each do |row|
+            puts row
+        end
     end
 
     def insert ()
@@ -125,13 +128,37 @@ class DB
 end
 
 db1 = DB.new(ENV['DATABASE'])
-# db1.createTable
-# db1.insert
-# db1.insert
 
-# db1.update
+loop do
+    puts "1. Create a table"
+    puts "2. Insert into the table"
+    puts "3. Update existing values"
+    puts "4. Delete records"
+    puts "5. Display table"
 
-db1.delete
+    choice = gets
+
+    case choice[0].to_i
+    when 1
+        db1.createTable
+    when 2
+        db1.insert
+    when 3
+        db1.update
+    when 4
+        db1.delete
+    when 5
+        db1.getDetails
+    else
+        puts "Invalid option"
+    end
+
+    puts "Continue: ('y' or 'n')"
+    ch = gets
+
+    break if ch[0] != 'y'
+end
+
 db1.close()
 
 
