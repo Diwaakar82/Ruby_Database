@@ -1,88 +1,132 @@
 require "mysql2"
 require 'dotenv/load'
 
-username = ENV['DB_USER']
-password = ENV['PASSWORD']
-database = ENV['DATABASE']
+class DB 
+    @@username = ENV['DB_USER']
+    @@password = ENV['PASSWORD']
+    @@tables = []
 
-client = Mysql2::Client.new(host: "localhost", username: username, password: password, database: database)
-
-def createTable (client,table_name, *args)
-    request = "CREATE TABLE #{table_name} ("
-
-    args.each do |value|
-        request += value
-        request += ','
-    end
-    request [request.length - 1] = ')'
-    client.query (request)
-end
-
-def insert (client, table_name, *args)
-    request = "INSERT INTO #{table_name} VALUES ("
-    args.each do |value|
-        formatted_value = value.is_a?(String) ? "'#{value}'" : value.to_s
-        request += formatted_value
-        request += ','
+    def initialize(database)
+        @database = database
+        @table_name = 'A'
+        @client = Mysql2::Client.new(host: "localhost", username: @@username, password: @@password, database: @database)
     end
 
-    request [request.length - 1] = ')'
-    client.query (request)
-end
+    def createTable ()
+        puts "Enter table name: "
+        @table_name = gets
+        
+        @@tables << @table_name
+        request = "CREATE TABLE #{@table_name} ("
+        
+        ch = 'y'
+        loop do
+            puts "Enter column name: "
+            request += gets
+            request += " "
+            puts "Enter type: "
+            request += gets
+            request += ","
 
+            puts "Are there more columns: ('y' or 'n')"
+            ch = gets
 
-def update (client, table_name, condition)
-    request = "UPDATE #{table_name} #{condition}"
-    client.query (request)
-end
+            # puts "Input: #{ch}"
+            break if ch[0] != 'y' || ch[0] != "y"
+        end
 
-def delete (client, table_name, condition)
-    request = "DELETE FROM #{table_name} #{condition}"
-    client.query (request)
-end
+        request [-1] = ')'
+        request += ';'
+        @client.query (request)
+    end
 
-def getDetails (client, table_name,condition,*columns)
-    request = "SELECT "
+    def getDetails ()
+        request = "SELECT "
+        
+        puts "1. Display all rows\n2. Show certain columns\n"
+        choice = gets
+
+        case choice
+            when 1
+                request += "* FROM #{@table_name};"
+            when 2
+                ch = 'y'
+                loop do
+                    puts "Enter column name: "
+                    request += gets
+                    request += ','
+
+                    puts "Are there more columns: ('y' or 'n')"
+                    ch = gets
+
+                    break if ch[0] != 'y'
+                end
+            else
+                puts "Invalid choice"
+                return
+        end
     
-    columns.each do |value|
-        request += value
-        request += ','
+        request [-1] = ""
+        request += "FROM #{@table_name}"
+        request += ';'
+    
+        @client.query (request)
     end
 
-    request [request.length - 1] = ""
-    request += "FROM #{table_name} #{condition}"
+    def insert ()
+        request = "INSERT INTO #{@table_name} VALUES ("
 
-    client.query (request)
-end
+        ch = 'y'
+        loop do
+            puts "Enter value: "
+            value = gets
+            value = value.is_a?(String) ? "'#{value}'" : value.to_s
+            request += value
+            request += ',' 
 
-def displayResults(rows)
-    puts "rows in the query :"
-    rows.each do |row|
-        puts row
+            puts "Are there more columns: ('y' or 'n')"
+            ch = gets
+
+            break if ch[0] != 'y'
+        end
+    
+        request [-1] = ')'
+        @client.query (request)
     end
+
+    def update ()
+        puts "Enter column to change: "
+        column = gets
+        puts "Value to update: "
+        value = gets
+        value = value.is_a?(String) ? "'#{value}'" : value.to_s
+
+        request = "UPDATE #{@table_name} SET #{column} = #{value}"
+        @client.query (request)
+    end
+
+    def delete ()
+        puts "Enter column to check: "
+        column = gets
+        puts "Delete if value is: "
+        value = gets
+        value = value.is_a?(String) ? "'#{value}'" : value.to_s
+
+        request = "DELETE FROM #{@table_name} WHERE #{column} = #{value}"
+        @client.query (request)
+    end
+
+    def close ()
+        @client.close
+    end
+
 end
 
-table = "info3"
-
-
-createTable(client,table,"USERID INTEGER","NAME VARCHAR (20)","AGE INTEGER","NATIVE VARCHAR (20)")
-insert(client,table,1,"GOWTHAM",21,"INDIA")
-insert(client,table,2,"DARRSHAN",20,"INDIA")
-insert(client,table,3,"VENKAT",21,"INDIA")
-
-displayResults(getDetails(client, table,"","*"))
-
-update(client, table, "SET USERID = 4 WHERE NAME = \"VENKAT\"")
-
-displayResults(getDetails(client, table,"","*"))
-
-delete(client, table, "WHERE USERID = 4")
-
-displayResults(getDetails(client, table,"","*"))
-
-# Close the connection when done
-client.close
-
+db1 = DB.new(ENV['DATABASE'])
+# db1.createTable
+db1.insert
+db1.insert
+db1.close()
 
 
 # changes 
@@ -101,5 +145,3 @@ client.close
 
 # test cases - 4
 # test delete table with condition - worked correctly
-
-
