@@ -15,13 +15,11 @@ def createTable (client,table_name, *args)
         request += ','
     end
     request [request.length - 1] = ')'
-    puts request
     client.query (request)
 end
 
 def insert (client, table_name, *args)
     request = "INSERT INTO #{table_name} VALUES ("
-    puts request
     args.each do |value|
         formatted_value = value.is_a?(String) ? "'#{value}'" : value.to_s
         request += formatted_value
@@ -29,7 +27,6 @@ def insert (client, table_name, *args)
     end
 
     request [request.length - 1] = ')'
-    puts request
     client.query (request)
 end
 
@@ -59,27 +56,50 @@ def getDetails (client, table_name,condition,*columns)
 end
 
 def displayResults(rows)
+    puts "rows in the query :"
     rows.each do |row|
         puts row
     end
 end
 
-# createTable (client,"info","USERID INTEGER","NAME VARCHAR (20)","AGE INTEGER","NATIVE VARCHAR (20)")
-# insert(client,"info",1,"GOWTHAM",21,"INDIA")
-# insert(client,"info",2,"DARRSHAN",20,"INDIA")
-# insert(client,"info",3,"VENKAT",21,"INDIA")
+table = "info3"
 
-displayResults(getDetails(client, "info","","*"))
 
-update(client, "info", "SET USERID = 4 WHERE NAME = \"VENKAT\"")
+createTable(client,table,"USERID INTEGER","NAME VARCHAR (20)","AGE INTEGER","NATIVE VARCHAR (20)")
+insert(client,table,1,"GOWTHAM",21,"INDIA")
+insert(client,table,2,"DARRSHAN",20,"INDIA")
+insert(client,table,3,"VENKAT",21,"INDIA")
 
-displayResults(getDetails(client, "info","","*"))
+displayResults(getDetails(client, table,"","*"))
 
-delete(client, "info", "WHERE USERID = 4")
+update(client, table, "SET USERID = 4 WHERE NAME = \"VENKAT\"")
+
+displayResults(getDetails(client, table,"","*"))
+
+delete(client, table, "WHERE USERID = 4")
+
+displayResults(getDetails(client, table,"","*"))
 
 # Close the connection when done
 client.close
 
 
+
+# changes 
+
 # Modify into functions
 # Add credentials into a file and not directly in the code
+
+# test cases - 1
+# tested created new table with info1 as table name - worked correctly
+
+# test cases -2 
+# tested insert new value into the function with given table structure - worked correctly
+
+# test cases - 3
+# tested update table - worked correctly
+
+# test cases - 4
+# test delete table with condition - worked correctly
+
+
