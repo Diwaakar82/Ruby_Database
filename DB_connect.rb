@@ -126,8 +126,12 @@ end
 
 db1 = DB.new(ENV['DATABASE'])
 # db1.createTable
-db1.insert
-db1.insert
+# db1.insert
+# db1.insert
+
+# db1.update
+
+db1.delete
 db1.close()
 
 
