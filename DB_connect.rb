@@ -91,6 +91,8 @@ class DB
         end
     
         request [-1] = ')'
+        request += ';'
+
         @client.query (request)
     end
 
@@ -101,7 +103,7 @@ class DB
         value = gets
         value = value.is_a?(String) ? "'#{value}'" : value.to_s
 
-        request = "UPDATE #{@table_name} SET #{column} = #{value}"
+        request = "UPDATE #{@table_name} SET #{column} = #{value};"
         @client.query (request)
     end
 
@@ -112,7 +114,7 @@ class DB
         value = gets
         value = value.is_a?(String) ? "'#{value}'" : value.to_s
 
-        request = "DELETE FROM #{@table_name} WHERE #{column} = #{value}"
+        request = "DELETE FROM #{@table_name} WHERE #{column} = #{value};"
         @client.query (request)
     end
 
